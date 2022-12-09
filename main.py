@@ -8,15 +8,15 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 
 def collect_input_data(file_path="wine.xlsx"):
-    input_data = pandas.read_excel(file_path, sheet_name="Лист1",
+    file_content = pandas.read_excel(file_path, sheet_name="Лист1",
                                   na_values=['N/A', 'NA'],
                                   keep_default_na=False)
-    input_data = input_data.to_dict(orient='record')
-    wine_info = collections.defaultdict(list)
-    for wine in input_data:
+    file_content = file_content.to_dict(orient='record')
+    descriptions = collections.defaultdict(list)
+    for wine in file_content:
         category = wine["Категория"]
-        wine_info[category].append(wine)
-    return wine_info
+        descriptions[category].append(wine)
+    return descriptions
 
 
 def get_correct_spelling(age):
@@ -46,7 +46,7 @@ def main():
     current_date = datetime.datetime.now()
     winery_age = current_date.year - establishment_year
     splelling_years = get_correct_spelling(winery_age)
-    wine_info = collect_input_data(file_path)
+    descriptions = collect_input_data(file_path)
     env = Environment(
         loader=FileSystemLoader('.'),
         autoescape=select_autoescape(['html', 'xml'])
@@ -54,7 +54,7 @@ def main():
     
     template = env.get_template('template.html')
     rendered_page = template.render(
-        wines=wine_info,
+        wines=descriptions,
         establishment_date=winery_age,
         spelled_year=splelling_years
     )
